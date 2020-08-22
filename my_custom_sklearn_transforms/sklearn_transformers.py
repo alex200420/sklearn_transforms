@@ -17,8 +17,8 @@ class DropColumns(BaseEstimator, TransformerMixin):
     
 # All sklearn Transforms must have the `transform` and `fit` methods
 class FillNA(BaseEstimator, TransformerMixin):
-    def __init__(self, columns):
-        self.columns = columns
+    def __init__(self):
+        return None
 
     def fit(self, X, y=None):
         return self
