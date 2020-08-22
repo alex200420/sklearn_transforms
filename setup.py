@@ -16,8 +16,8 @@ setup(
             'my_custom_sklearn_transforms'
       ],
       install_requires=[
-            'xgboost==0.82',
-            'scikit-learn==0.20.0'
+            'xgboost==0.80',
+            'scikit-learn==0.19'
       ],
       zip_safe=False
 )
