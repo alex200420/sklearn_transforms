@@ -17,7 +17,7 @@ setup(
       ],
       install_requires=[
             'xgboost==0.82',
-            'sklearn==0.20.3'
+            'scikit-learn==0.20.3'
       ],
       zip_safe=False
 )
