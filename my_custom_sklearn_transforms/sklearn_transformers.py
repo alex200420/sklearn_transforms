@@ -41,18 +41,20 @@ class AddColumns(BaseEstimator, TransformerMixin):
         # Primero copiamos el dataframe de datos de entrada 'X'
         df2 = X.copy()
         #
-        df2['ratio_CXC_TOTAL_GASTOS'] = df2['CXC']/df2['TOTAL_GASTOS']
-        df2['ratio_GASTOS_UTILIDAD_BRUTA'] = df2['TOTAL_GASTOS']/df2['UTILIDAD_BRUTA']
-        df2['ratio_VENTAS_TRANSPORTE'] = df2['TOTAL_VENTAS']/df2['EQ_TRANSPORTE']
-        df2['ratio_UTILIDADES_TOTAL'] = df2['UTILIDAD_O_PERDIDA']/df2['UTILIDADES_ACUMULADAS']
-        df2['ratio_UTILIDADES_GASTOS'] = df2['UTILIDAD_BRUTA']/df2['TOTAL_GASTOS']
-        df2['ratio_CXC_CXP'] = df2['CXC']/df2['CXP']
-        df2['ratio_CXC_UTILIDAD'] = df2['UTILIDAD_BRUTA']/df2['CXC']
-        df2['ratio_CXC_GASTOS'] = df2['TOTAL_GASTOS']/df2['CXP']
-        df2['ratio_CXC_VENTAS'] = df2['TOTAL_VENTAS']/df2['CXP']
-        df2['exp_VENTAS_UTILIDAD'] = df2['TOTAL_VENTAS']**(1/df2['UTILIDADES_ACUMULADAS'])
-        df2['ratio_CXC_INVENTARIO'] = df2['CXC']/df2['INVENTARIO']
-        df2['ratio_CXP_INVENTARIO'] = df2['CXP']/df2['INVENTARIO']
+        ratio_pp = lambda x,y: x/y if y!=0 else 0
+        exp_pp = lambda x,y: x**(1/y) if (y!=0 and x!=-1) else 0
+        df2['ratio_CXC_TOTAL_GASTOS'] = df2.apply(lambda row: ratio_pp(row['CXC'],row['TOTAL_GASTOS']), axis = 1)
+        df2['ratio_GASTOS_UTILIDAD_BRUTA'] = df2.apply(lambda row: ratio_pp(row['TOTAL_GASTOS'],row['UTILIDAD_BRUTA']), axis = 1)
+        df2['ratio_VENTAS_TRANSPORTE'] = df2.apply(lambda row: ratio_pp(row['TOTAL_VENTAS'],row['EQ_TRANSPORTE']), axis = 1)
+        df2['ratio_UTILIDADES_TOTAL'] = df2.apply(lambda row: ratio_pp(row['UTILIDAD_O_PERDIDA'],row['UTILIDADES_ACUMULADAS']), axis = 1)
+        df2['ratio_UTILIDADES_GASTOS'] = df2.apply(lambda row: ratio_pp(row['UTILIDAD_BRUTA'],row['TOTAL_GASTOS']), axis = 1)
+        df2['ratio_CXC_CXP'] = df2.apply(lambda row: ratio_pp(row['CXC'],row['CXP']), axis = 1)
+        df2['ratio_CXC_UTILIDAD'] = df2.apply(lambda row: ratio_pp(row['UTILIDAD_BRUTA'],row['CXC']), axis = 1)
+        df2['ratio_CXC_GASTOS'] = df2.apply(lambda row: ratio_pp(row['TOTAL_GASTOS'],row['CXP']), axis = 1)
+        df2['ratio_CXC_VENTAS'] = df2.apply(lambda row: ratio_pp(row['TOTAL_VENTAS'],row['CXP']), axis = 1)
+        df2['exp_VENTAS_UTILIDAD'] = df2.apply(lambda row: exp_pp(row['TOTAL_VENTAS'],row['UTILIDADES_ACUMULADAS']), axis = 1)
+        df2['ratio_CXC_INVENTARIO'] = df2.apply(lambda row: ratio_pp(row['CXC'],row['INVENTARIO']), axis = 1)
+        df2['ratio_CXP_INVENTARIO'] = df2.apply(lambda row: ratio_pp(row['CXP'],row['INVENTARIO']), axis = 1)
         ##
         for column in df2.columns[~np.isin(df2.columns, ['OBJETIVO'])]:
             if column[-6:] != 'isnull':
