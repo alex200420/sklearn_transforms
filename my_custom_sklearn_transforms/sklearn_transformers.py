@@ -42,7 +42,7 @@ class AddColumns(BaseEstimator, TransformerMixin):
         df2 = X.copy()
         #
         ratio_pp = lambda x,y: x/y if y!=0 else 0
-        exp_pp = lambda x,y: x**(1/y) if (y!=0 and x!=-1) else 0
+        exp_pp = lambda x,y: x**(1/y) if (y>0 or x < 0) else 0
         df2['ratio_CXC_TOTAL_GASTOS'] = df2.apply(lambda row: ratio_pp(row['CXC'],row['TOTAL_GASTOS']), axis = 1)
         df2['ratio_GASTOS_UTILIDAD_BRUTA'] = df2.apply(lambda row: ratio_pp(row['TOTAL_GASTOS'],row['UTILIDAD_BRUTA']), axis = 1)
         df2['ratio_VENTAS_TRANSPORTE'] = df2.apply(lambda row: ratio_pp(row['TOTAL_VENTAS'],row['EQ_TRANSPORTE']), axis = 1)
@@ -62,6 +62,6 @@ class AddColumns(BaseEstimator, TransformerMixin):
         ##
         for skewed_col in self.skewed_cols:
             df2[f'{skewed_col}_outlier'] = np.int32(abs((df2[skewed_col] - df2[skewed_col].mean())/df2[skewed_col].std())>3)
-            df2[skewed_col] = np.log1p(df2[skewed_col])
+            df2[skewed_col] = df2[skewed_col].apply(lambda x: np.log1p(x) if x > -1 else np.nan)
         # Devolvemos un nuevo dataframe de datos sin las columnas no deseadas
         return df2
