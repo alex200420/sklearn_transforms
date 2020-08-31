@@ -42,7 +42,7 @@ class AddColumns(BaseEstimator, TransformerMixin):
         df2 = X.copy()
         #
         ratio_pp = lambda x,y: x/y if y!=0 else 0
-        exp_pp = lambda x,y: x**(1/y) if (y>0 or x < 0) else 0
+        exp_pp = lambda x,y: x**(1/y) if (y>0 and x > 0) else 0
         df2['ratio_CXC_TOTAL_GASTOS'] = df2.apply(lambda row: ratio_pp(row['CXC'],row['TOTAL_GASTOS']), axis = 1)
         df2['ratio_GASTOS_UTILIDAD_BRUTA'] = df2.apply(lambda row: ratio_pp(row['TOTAL_GASTOS'],row['UTILIDAD_BRUTA']), axis = 1)
         df2['ratio_VENTAS_TRANSPORTE'] = df2.apply(lambda row: ratio_pp(row['TOTAL_VENTAS'],row['EQ_TRANSPORTE']), axis = 1)
