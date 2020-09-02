@@ -65,3 +65,55 @@ class AddColumns(BaseEstimator, TransformerMixin):
             df2[skewed_col] = df2[skewed_col].apply(lambda x: np.log1p(x) if x > -1 else np.nan)
         # Devolvemos un nuevo dataframe de datos sin las columnas no deseadas
         return df2
+
+    
+# All sklearn Transforms must have the `transform` and `fit` methods
+class TransformChallengeOne(BaseEstimator, TransformerMixin):
+    def __init__(self, columns):
+        self.cols = columns
+
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X):
+        # Primero copiamos el dataframe de datos de entrada 'X'
+        df = X.copy()
+        ratio_pp = lambda x,y: x/y if y!=0 else 0
+        # adding total sum columns
+        df['HOURS_TOTAL']= df['HOURS_DATASCIENCE']+df['HOURS_BACKEND']+df['HOURS_FRONTEND']
+
+        df['NUM_COURSES_BEGINNER']= df['NUM_COURSES_BEGINNER_DATASCIENCE']+\
+                                           df['NUM_COURSES_BEGINNER_BACKEND']+\
+                                           df['NUM_COURSES_BEGINNER_FRONTEND']
+
+        df['NUM_COURSES ADVANCED']= df['NUM_COURSES_ADVANCED_BACKEND']+\
+                                           df['NUM_COURSES_ADVANCED_DATASCIENCE']+\
+                                           df['NUM_COURSES_ADVANCED_FRONTEND']
+
+        ## adding ratios
+        df['RT_DS_HOURS'] = df.apply(lambda row: ratio_pp(row['HOURS_DATASCIENCE'],row['HOURS_TOTAL']), axis = 1)
+        df['RT_BE_HOURS'] = df.apply(lambda row: ratio_pp(row['HOURS_BACKEND'],row['HOURS_TOTAL']), axis = 1)
+        df['RT_FE_HOURS'] = df.apply(lambda row: ratio_pp(row['HOURS_FRONTEND'],row['HOURS_TOTAL']), axis = 1)
+        df['RT_DS'] = df.apply(lambda row: ratio_pp(row['NUM_COURSES_ADVANCED_DATASCIENCE'],row['NUM_COURSES_BEGINNER_DATASCIENCE']), axis = 1)
+        df['RT_BE'] = df.apply(lambda row: ratio_pp(row['NUM_COURSES_ADVANCED_BACKEND'],row['NUM_COURSES_BEGINNER_BACKEND']), axis = 1)
+        df['RT_FE'] = df.apply(lambda row: ratio_pp(row['NUM_COURSES_ADVANCED_FRONTEND'],row['NUM_COURSES_BEGINNER_FRONTEND']), axis = 1)
+        ## defining function to apply
+        def passgrade(x):
+            if x <50:
+                return 0
+            elif x>75:
+                return 1
+            elif pd.isnull(x):
+                return 0.5
+            else:
+                return x/100
+        ## adding self made custom columns
+        df['PASS_DS'] = df['AVG_SCORE_DATASCIENCE'].apply(passgrade)
+        df['PASS_BE'] = df['AVG_SCORE_BACKEND'].apply(passgrade)
+        df['PASS_FE'] = df['AVG_SCORE_FRONTEND'].apply(passgrade)
+        # adding columns to identify nans
+        for column in self.cols:
+            if column[-6:] != 'isnull':
+                df[f'{column}_isnull'] = np.int32(df[column].isnull())
+        # returning df
+        return df
